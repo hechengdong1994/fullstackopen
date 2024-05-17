@@ -1,90 +1,142 @@
-// 可以使用所谓的props向组件传递数据
-// props作为一个参数，接收一个对象，该对象有对应于组件用户定义的所有的字段。
-const Hello = (props) => {
-  return (
-    <div>
-      <p>
-        Hello {props.name}, you are {props.age} years old
-      </p>
-    </div>
-  )
+// 组件的辅助函数
+// const Hello = props => {
+//     // 解构使得变量的赋值更加容易，可以用来提取和收集一个对象的属性值到单独的变量中。
+//     const { name, age } = props
+// 更进一步的解构
+// const Hello = ({ name, age }) => {
+//     // 这个辅助函数实际上是定义在另一个函数里面，这个函数定义了我们组件行为。
+//     // 在Java编程中，在另一个函数中定义一个函数是很复杂和麻烦的，所以不是那么常见。
+//     // 然而，在JavaScript中，在函数中定义函数是一种常规操作。
+//     // const bornYear = () => {
+//     //     const yearNow = new Date().getFullYear()
+//     //     return yearNow - age
+//     // }
+//     // 箭头函数的更紧凑的语法。函数只是返回单个表达式的结果
+//     const bornYear = () => new Date().getFullYear() - age
+
+
+//     return (
+//         <div>
+//             <p>
+//                 Hello {name}, you are {age} years old
+//             </p>
+//             <p>So you were probably born in {bornYear()}</p>
+//         </div>
+//     )
+// }
+// 组件的辅助函数
+// const App = () => {
+//     const name = 'Peter'
+//     const age = 10
+
+//     return (
+//         <div>
+//             <h1>Greetings</h1>
+//             <Hello name='Maya' age={26 + 10} />
+//             <Hello name={name} age={age} />
+//         </div>
+//     )
+// }
+
+// 组件的重新渲染
+// const App = props => {
+//     const {counter} = props
+//     return (
+//         <div>{counter}</div>
+//     )
+// }
+
+import { useState } from "react";
+
+// 拥有状态的组件
+// 在React的状态钩子的帮助下，给组件添加状态。
+// const App = () => {
+//     // 该函数调用将state添加到组件中，并将其初始化为0值。该函数返回一个包含两个项目的数组。
+//     const [counter, setCounter] = useState(0)
+//     // 当修改状态的函数setCounter被调用时，React重新渲染组件，这意味着组件函数的函数体被重新执行。
+//     // 第二次执行组件函数时，它会调用useState函数并返回状态的新值。
+
+//     // 事件处理函数
+//     // const handleClick = () => {
+//     //     console.log('clicked')
+//     // }
+//     const increaseByOne = () => setCounter(counter + 1)
+//     const setToZero = () => setCounter(0)
+
+//     // setTimeout(
+//     //     () => setCounter(counter + 1),
+//     //     1000
+//     // )
+
+//     // 重新渲染意味着重新执行函数体
+//     console.log('rendering...', counter)
+
+//     return (
+//         <div>
+//             <div>{counter}</div>
+//             {/* 注意：一个事件处理程序应该是一个函数或者一个函数引用 */}
+//             {/* <button onClick={handleClick}> */}
+//             {/* 事件处理函数也可以直接在属性赋值中定义， 但通常在JSX模板中定义事件处理程序并不是一个好主意 */}
+//             {/* <button onClick={() => setCounter(counter + 1)}> */}
+//             {/* 在这里，事件处理程序已经被正确定义。onClick属性的值是一个变量，包含对一个函数的引用。 */}
+//             <button onClick={increaseByOne}>
+//                 plus
+//             </button>
+//             {/* <button onClick={() => setCounter(0)}> */}
+//             <button onClick={setToZero}>
+//                 zero
+//             </button>
+//             {/* 该事件处理程序实际上是一个函数调用。这将导致组件不断循环重复被渲染 */}
+//             {/* <button onClick={setCounter(counter+1)}>
+//                 plus error
+//             </button> */}
+//         </div>
+//     )
+// }
+
+// 状态的传递
+const Display = ({counter}) => <div>{counter}</div>
+// 注意: 要小心不要过于简化您的组件，因为这会使日后增加复杂性变得更加繁琐。
+
+
+const Button = (props) => {
+    // 事件处理程序是通过onClick prop传递给Button组件的。这个prop的名字本身并不重要，但我们的命名选择并不是完全随机的。React的官方 tutorial建议采用这种惯例。
+    // 根据约定，事件处理程序属性应以 on 开头，后面跟着一个大写字母。 例如，按钮组件的 onClick 属性可以称为 onSmash
+    return (
+        <button onClick={props.onClick}>
+            {props.text}
+        </button>
+    )
 }
 
 const App = () => {
-  // 定义组件的函数，可以包含任何种类的js代码
-  // console.log('Hello from App component')
-  // 该函数返回表达式的值
-  // 可以渲染静态标签
-  // return (
-  //   <div>
-  //     <p>Hello world</p>
-  //   </div>
-  // )
-  // 也可以渲染动态内容
-  // const now = new Date()
-  // const a = 10
-  // const b = 20
-  // return (
-  //   <div>
-  //     <p>Hello world, it is {now.toString()}</p>
-  //     <p>
-  //       {a} plus {b} is {a + b}
-  //     </p>
-  //   </div>
-  // )
-  // const name = 'Peter'
-  // const age = 10
-  // return (
-  //   <div>
-  //     <h1>Greetings</h1>
-  //     {/* 组件中可以使用其他组件 */}
-  //     <Hello />
-  //     {/* 一个组件可以被多次使用 */}
-  //     <Hello />
-  //     {/* pros定义 */}
-  //     <Hello name="George" />
-  //     <Hello name="Daisy" />
-  //     {/* 可以有任意数量的prop，它们的值可以是"硬编码"的字符串或JavaScript表达式的结果。如果prop的值是用JavaScript实现的，它必须用大括号来包裹。 */}
-  //     {/* 组件发送的props是变量的值、表达式的计算结果和一个常规字符串。 */}
-  //     <Hello name="Maya" age={26+10} />
-  //     <Hello name={name} age={age} />
-  //   </div>
-  // )
-  // 注意，React组件的内容（通常）需要包含一个根元素。
-  // 例如，如果我们试图定义组件App而不使用最外层的div元素，结果是返回一个错误信息。
-  // return (
-  //   <h1>Greetings</h1>
-  //   <Hello name='Maya' age={26+10} />
-  // )
-  // 使用根元素并不是唯一可行的选择。一个组件的array也是一个有效的解决方案。
-  // 注：实际上依然是报错的
-  // return [
-  //   <h1>Greetings</h1>
-  //   <Hello name='Maya' age={26+10} />
-  // ]
-  // 由于根元素被强制规定了，我们在DOM树中有"额外的"div元素。这可以通过使用fragments来避免，即用一个空元素来包装组件要返回的元素。
-  const name='Peter'
-  const age=10
-  return (
-    <>
-      <h1>Greetings</h1>
-      <Hello name='Maya' age={26+10} />
-      <Hello name={name} age={age} />
-    </>
-  )
-  // 看起来React组件返回的是HTML标记。然而，事实并非如此。
-  // React组件的布局大多是用JSX编写的。
-  // 虽然JSX如下所示：HTML，但我们实际上是在处理一种写JavaScript的方式。
-  // 底层上，由React组件返回的JSX被编译成JavaScript。
-  // 编译是由Babel处理的。用create-react-app创建的项目被配置为自动编译。
-  // 实际上，JSX很像HTML，区别在于使用JSX，你可以通过在大括号内编写适当的JavaScript来轻松嵌入动态内容。
-  // JSX的理念与许多模板语言非常相似，例如与Java Spring一起使用的Thymeleaf，它被用在服务器上。
-  // JSX是"XML-like"语言，这意味着每个标签都需要被关闭。
-  // 用React编写组件是很容易的，通过组合组件，即使是比较复杂的应用也可以保持相当的可维护性。
-  // 事实上，React的一个核心理念是由许多专门的可重复使用的组件组成应用。
-  // 另一个强制的惯例是在应用的组件树的顶端有一个叫做App的根组件。
-  // 然而，有些情况下，组件App并不完全是根，而是被包裹在一个适当的实用组件中。
-  // React组件名称必须大写
+    // 1.当应用启动时，App中的代码被执行。这段代码使用一个useState钩子来创建应用的状态，设置变量counter的初始值。
+    // 4.调用一个改变状态的函数会导致组件重新渲染。App组件被重新渲染。这导致其子组件Display和Button也被重新渲染。
+    const [counter, setCounter] = useState(0)
+
+    const increaseByOne = () => setCounter(counter + 1)
+    const decreaseByOne = () => setCounter(counter - 1)
+    const setToZero = () => setCounter(0)
+
+    // 2.这个组件包含Display组件--显示计数器的值0--和三个Button组件。这些按钮都有事件处理程序，用来改变计数器的状态。
+    // 3.当其中一个按钮被点击时，事件处理程序被执行。该事件处理程序通过setCounter函数改变App组件的状态。
+    return (
+        <div>
+            <Display counter={counter} />
+            <Button
+                onClick={increaseByOne}
+                text='plus'
+            />
+            <Button
+                onClick={setToZero}
+                text='zero'
+            />
+            <Button
+                onClick={decreaseByOne}
+                text='minus'
+            />
+        </div>
+    )
 }
 
 export default App;
