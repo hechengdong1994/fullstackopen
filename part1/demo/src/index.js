@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import App from './App';
+// import App from './App1a';
+// import App from './App1c';
+import App from './App1d';
 
 // 定义了一个名为App的React组件。
 // 在文件index.js的最后一行的命令：将其内容渲染到div-元素中，该元素在文件public/index.html中定义，其id值为'root'。
