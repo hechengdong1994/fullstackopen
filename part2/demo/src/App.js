@@ -1,10 +1,35 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import axios from "axios"
 import Note from "./components/Note"
 
-const App = (props) => {
-  const [notes, setNotes] = useState(props.notes)
-  const [newNote, setNewNote] = useState('a new note...')
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
+
+  // Effect 允许组件连接到外部系统并与之同步。
+  // 这包括处理网络、浏览器、DOM、动画、使用不同 UI 库编写的小部件以及其他非 React 代码。
+  const hook = () => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/notes')
+      .then(response => {
+        console.log('promise fulfilled')
+        setNotes(response.data)
+      })
+  }
+  // 函数useEffect实际上需要两个参数。第一个是一个函数，即effect本身。
+  // 默认情况下，effect会在每次完成渲染后运行，但你可以选择只在某些值发生变化时启动它。
+  // 所以默认情况下，effect总是在组件被渲染后运行。然而，在我们的例子中，我们只想在第一次渲染时执行效果。
+  // useEffect的第二个参数用于指定效果的运行频率。如果第二个参数是一个空的数组[]，那么效果就只在组件的第一次渲染时运行。
+  useEffect(hook, [])
+  // 总的来说，useEffect提供了一种在【函数组件】中组织和处理副作用的方式。
+  // useEffect的工作方式如下：
+  // 在每次渲染后，包括首次渲染，useEffect 都会运行。这就是为什么我们说它在“副作用”之后运行。这与类组件的 componentDidMount 和 componentDidUpdate 生命周期方法类似。
+  // 你可以在 useEffect 中返回一个函数，这个函数将在组件卸载前运行，以及在后续渲染前运行。这就是为什么我们说它在“清理副作用”之前运行。这与类组件的 componentWillUnmount 生命周期方法类似。
+  // 你可以给 useEffect 传递第二个参数，这个参数是一个数组，里面包含了你的副作用函数依赖的所有值。当这些值发生改变时，useEffect 就会重新运行。如果这个数组为空，useEffect 只会在首次渲染和卸载时运行。
+  console.log('render', notes.length, 'notes')
+  // 注意：事件序列。代码的哪些部分被运行？以什么顺序？多久一次？了解事件的顺序是至关重要的!
 
   // 参数event是触发调用事件处理函数的事件
   const addNote = (event) => {
