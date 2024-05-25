@@ -49,8 +49,28 @@ const generateId = () => {
         : 0
     return maxId + 1
 }
+
+
 // 为了方便地访问数据，我们需要 express json-parser 的帮助，它可以通过命令 app.use(express.json()) 来使用。
+// json-parser 是一个所谓的 中间件。中间件是可以用来处理 request 和 response 对象的函数。
 app.use(express.json())
+// 实践中，你可以同时使用几个中间件。当你有多个中间件时，它们会按照在 Express 中被使用的顺序一个一个地被执行。
+const requestLogger = (request, response, next) => {
+    console.log("Method: ", request.method)
+    console.log('Path: ', request.path)
+    console.log('Body: ', request.body)
+    console.log('---')
+    // next 函数将控制权交给下一个中间件。
+    next()
+}
+// 中间件函数的调用顺序是它们被 Express 服务器对象的 use 方法所使用的顺序。
+app.use(requestLogger)
+// 在路由之后添加以下中间件，用于捕捉向不存在的路由发出的请求。对于这些请求，中间件将返回一个 JSON 格式的错误信息。
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
 app.post('/api/notes', (request, response) => {
     // console.log(request.headers)
 
@@ -137,3 +157,14 @@ app.listen(PORT, () => {
 // Representational State Transfer，又称 REST，于 2000 年在 Roy Fielding 的 论文 中提出。REST 是一种架构风格，旨在建立可扩展的网络应用。
 // 在 RESTful 思想中，单一的东西，如我们应用中的笔记，被称为 资源 。每个资源都有一个相关的 URL，这是资源的唯一地址。
 // 一个惯例是通过结合资源类型的名称和资源的唯一标识符来创建资源的唯一地址。
+
+// HTTP 标准 谈到了与请求类型有关的两个属性：安全 和 空闲。
+// GET 请求应该是 安全的 。
+// 特别是，约定俗成的是，GET 和 HEAD 方法不应具有除检索以外的行动意义。这些方法应该被认为是 " 安全的 "。。
+// 安全意味着执行的请求不能在服务器中引起任何 副作用 。我们所说的副作用是指数据库的状态不能因为请求而改变，而且响应必须只返回服务器上已经存在的数据。
+// HTTP 标准还定义了请求类型 HEAD，这应该是安全的。
+// 在实践中，HEAD 的工作方式应该与 GET 完全一样，但它不返回任何东西，只返回状态代码和响应头。当你发出 HEAD 请求时，响应体将不会被返回。
+// 除了 POST，所有的 HTTP 请求都应该是 idempotent幂等
+// 就像 GET 请求的 安全 一样， 空闲 也只是 HTTP 标准中的一个建议，并不是简单地基于请求类型就能保证的。
+// 然而，当我们的 API 遵守 RESTful 原则时，那么 GET、HEAD、PUT 和 DELETE 请求的使用方式就是 idempotent。
+// POST 是唯一的 HTTP 请求类型，既不 安全 也不 空闲 。
