@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import axios from "axios"
+import noteService from './services/notes'
 import Note from "./components/Note"
 
 const App = () => {
@@ -11,11 +11,10 @@ const App = () => {
   // 这包括处理网络、浏览器、DOM、动画、使用不同 UI 库编写的小部件以及其他非 React 代码。
   const hook = () => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/notes')
-      .then(response => {
-        console.log('promise fulfilled')
-        setNotes(response.data)
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
       })
   }
   // 函数useEffect实际上需要两个参数。第一个是一个函数，即effect本身。
@@ -31,6 +30,29 @@ const App = () => {
   console.log('render', notes.length, 'notes')
   // 注意：事件序列。代码的哪些部分被运行？以什么顺序？多久一次？了解事件的顺序是至关重要的!
 
+  const toggleImportanceOf = (id) => {
+    const note = notes.find(n => n.id === id)
+    // { ...note }创建了一个新的对象，并复制了note对象的所有属性
+    // 还值得注意的是，新对象changedNote只是一个浅层拷贝，意味着新对象的值与旧对象的值相同。
+    // 如果旧对象的值本身是对象，那么新对象中的复制值将引用旧对象中的相同对象。
+    const changedNote = { ...note, important: !note.important }
+    // 不推荐这样做，因为变量note是对组件状态中notes数组中的一个项目的引用，
+    // 记得决不能在React中直接改变状态
+    // note.important = !note.important
+
+    noteService
+      .update(id, changedNote)
+      .then(returnedNote => {
+        setNotes(notes.map(note => note.id !== id ? note : returnedNote))
+      })
+      .catch(error => {
+        alert(
+          `the note '${note.content}' was already deleted from server`
+        )
+        setNotes(notes.filter(n => n.id !== id))
+      })
+  }
+
   // 参数event是触发调用事件处理函数的事件
   const addNote = (event) => {
     // 防止提交表单的默认动作。默认动作会忽略其他操作，导致页面重新加载。
@@ -41,12 +63,18 @@ const App = () => {
       content: newNote,
       date: new Date().toISOString(),
       important: Math.random() < 0.5,
+      // 省略了id属性，因为最好让服务器为我们的资源生成id
       id: notes.length + 1
     }
 
-    // 该方法并不改变原始的notes数组，而是创建一个新的数组副本，将新的项目添加到最后。这很重要，因为在React中必须永远不要直接改变状态!
-    setNotes(notes.concat(noteObject))
-    setNewNote('')
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        // console.log(response)
+        // 该方法并不改变原始的notes数组，而是创建一个新的数组副本，将新的项目添加到最后。这很重要，因为在React中必须永远不要直接改变状态!
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
   }
 
   const handleNoteChange = (event) => {
@@ -76,7 +104,11 @@ const App = () => {
           //   {note.content}
           // </li>
           // 注意，现在必须为Note组件定义key属性，而不是像以前那样为li标签定义。
-          <Note key={note.id} note={note} />
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
         )}
       </ul>
       {/* Anti-pattern: Array Indexes as Keys
