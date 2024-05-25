@@ -1,11 +1,32 @@
 import { useState, useEffect } from "react"
 import noteService from './services/notes'
 import Note from "./components/Note"
+import Notification from "./components/Notification"
+
+const Footer = () => {
+  // React也可以在代码中直接编写样式，即所谓的内联样式。
+  // 定义内联样式的想法非常简单。任何React组件或元素都可以通过style属性作为JavaScript对象提供一组CSS属性。
+  // 每个CSS属性都被定义为JavaScript对象的一个独立属性。
+  // 像素的数字值可以简单地定义为整数。与普通的CSS相比，其中一个主要区别是，连字符（kebab case）的CSS属性是用camelCase写的。
+  // 构成应用功能实体的结构单元是React组件。一个React组件定义了构造内容的HTML，决定功能的JavaScript函数，以及组件的样式；所有这些都在一个地方。这是为了创建尽可能独立和可重复使用的单个组件。
+  const footerStyle = {
+    color: 'green',
+    fontStyle: 'italic',
+    fontSize: 16
+  }
+  return (
+    <div style={footerStyle}>
+      <br />
+      <em>Note app, Department of Computer Science, University of Helsinki 2022</em>
+    </div>
+  )
+}
 
 const App = () => {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState('')
   const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('some error happened...')
 
   // Effect 允许组件连接到外部系统并与之同步。
   // 这包括处理网络、浏览器、DOM、动画、使用不同 UI 库编写的小部件以及其他非 React 代码。
@@ -46,9 +67,12 @@ const App = () => {
         setNotes(notes.map(note => note.id !== id ? note : returnedNote))
       })
       .catch(error => {
-        alert(
-          `the note '${note.content}' was already deleted from server`
+        setErrorMessage(
+          `Note ${note.content} was already removed from server`
         )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
         setNotes(notes.filter(n => n.id !== id))
       })
   }
@@ -92,6 +116,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all'}
@@ -129,6 +154,8 @@ const App = () => {
         />
         <button type="submit">save</button>
       </form>
+
+      <Footer />
     </div>
   )
 
