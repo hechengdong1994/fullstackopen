@@ -3,6 +3,7 @@ import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -11,6 +12,9 @@ const App = () => {
 
   const [filter, setFilter] = useState('')
   const [showPersons, setShowPersons] = useState([])
+
+  const [message, setMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const effectHook = () => {
     personService
@@ -29,8 +33,13 @@ const App = () => {
         .then(removedPerson => {
           setPersons(persons.filter(p => p.id !== person.id))
           setShowPersons(showPersons.filter(p => p.id !== person.id))
-        }
-        )
+        })
+        .catch((error) => {
+          setErrorMessage(`Information of ${person.name} has already been removed from server`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+        })
     }
   }
 
@@ -59,7 +68,7 @@ const App = () => {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const newPerson = { name: newName, number: newNumber }
         personService
-          .update(existPerson.id, )
+          .update(existPerson.id,)
           .then(replacePerson => {
             const newPersons = persons.map(p => p.id === existPerson.id ? newPerson : p)
             setPersons(newPersons)
@@ -67,6 +76,10 @@ const App = () => {
             setNewNumber('')
             setFilter('')
             setShowPersons(newPersons)
+            setMessage(`Added ${newPerson.name} `)
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
           })
       }
     } else {
@@ -79,6 +92,10 @@ const App = () => {
           setNewNumber('')
           setFilter('')
           setShowPersons(newPersons)
+          setMessage(`Added ${newPerson.name} `)
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
         })
 
     }
@@ -87,6 +104,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} errorMessage={errorMessage} />
       <Filter
         value={filter}
         onChange={onFilterChange}
