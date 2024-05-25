@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
-import axios from 'axios'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -13,16 +13,26 @@ const App = () => {
   const [showPersons, setShowPersons] = useState([])
 
   const effectHook = () => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then((response) => {
-        console.log(response)
-        setPersons(response.data)
-        setShowPersons(response.data)
+    personService
+      .getAll()
+      .then((initialData) => {
+        setPersons(initialData)
+        setShowPersons(initialData)
       })
   }
   useEffect(effectHook, [])
+
+  const onRemoveClick = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      personService
+        .remove(person.id)
+        .then(removedPerson => {
+          setPersons(persons.filter(p => p.id !== person.id))
+          setShowPersons(showPersons.filter(p => p.id !== person.id))
+        }
+        )
+    }
+  }
 
   const onFilterChange = (event) => {
     const newFilter = event.target.value
@@ -42,16 +52,35 @@ const App = () => {
 
   const onSubmit = (event) => {
     event.preventDefault()
-    if (persons.findIndex((person) => person.name === newName) >= 0) {
+    const existPerson = persons.find((person) => person.name === newName)
+    if (existPerson) {
       // 模版字符串
-      alert(`${newName} is already added to phonebook`)
+      // alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const newPerson = { name: newName, number: newNumber }
+        personService
+          .update(existPerson.id, )
+          .then(replacePerson => {
+            const newPersons = persons.map(p => p.id === existPerson.id ? newPerson : p)
+            setPersons(newPersons)
+            setNewName('')
+            setNewNumber('')
+            setFilter('')
+            setShowPersons(newPersons)
+          })
+      }
     } else {
-      const newPersons = persons.concat({ name: newName, number: newNumber })
-      setPersons(newPersons)
-      setNewName('')
-      setNewNumber('')
-      setFilter('')
-      setShowPersons(newPersons)
+      personService
+        .create({ name: newName, number: newNumber })
+        .then(newPerson => {
+          const newPersons = persons.concat(newPerson)
+          setPersons(newPersons)
+          setNewName('')
+          setNewNumber('')
+          setFilter('')
+          setShowPersons(newPersons)
+        })
+
     }
   }
 
@@ -71,7 +100,7 @@ const App = () => {
         onSubmit={onSubmit}
       />
       <h3>Numbers</h3>
-      <Persons showPersons={showPersons} />
+      <Persons showPersons={showPersons} onRemoveClick={onRemoveClick} />
     </div>
   )
 }
