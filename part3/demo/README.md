@@ -115,3 +115,169 @@ PORT=3001copy
 
 .gitignore in vscode with .env line added
 在.env文件中定义的环境变量可以通过表达式require('dotenv').config()引入，你可以像引用普通环境变量一样在代码中引用它们，使用process.env.MONGODB_URI语法。
+
+# Lint
+在我们进入下一部分之前，我们介绍一个重要的工具，叫做lint。维基百科对lint的描述如下：
+
+一般来说，lint或者linter是任何检测和标记编程语言中错误的工具，包括样式错误。术语 lint-like behavior 有时用于标记可疑语言使用的过程。Lint类 的工具通常对源代码进行静态分析。
+
+在编译的静态类型语言如Java中，像NetBeans这样的IDE可以指出代码中的错误，甚至是编译错误之外的错误。像checkstyle这样的用于执行静态分析的附加工具，可以用来扩展IDE的能力，也可以指出与样式相关的问题，如缩进。
+
+在JavaScript领域，目前主导的静态分析（又名"linting"）工具是ESlinthttps://eslint.org/。
+
+让我们使用以下命令将ESlint作为开发依赖项安装到notes后端项目中：
+
+npm install eslint --save-devcopy
+之后我们可以用以下命令初始化一个默认的ESlint配置：
+
+npx eslint --initcopy
+我们要回答所有的问题：
+
+ESlint初始化的终端输出
+配置将会保存在 .eslintrc.js 文件中。我们将在 env 配置中将 browser 改为 node：
+
+module.exports = {
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true
+    },
+    "overrides": [
+        {
+            "env": {
+                "node": true
+            },
+            "files": [
+                ".eslintrc.{js,cjs}"
+            ],
+            "parserOptions": {
+                "sourceType": "script"
+            }
+        }
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+    }
+}copy
+让我们稍微修改一下配置。安装一个插件，该插件定义了一套与代码风格相关的规则https://eslint.style/packages/js：
+
+npm install --save-dev @stylistic/eslint-plugin-jscopy
+启用插件并添加一个扩展定义和四个代码风格规则：
+
+module.exports = {
+    // ...
+    'plugins': [
+        '@stylistic/js'
+    ],
+    'extends': 'eslint:recommended',
+    'rules': {
+        '@stylistic/js/indent': [
+            'error',
+            2
+        ],
+        '@stylistic/js/linebreak-style': [
+            'error',
+            'unix'
+        ],
+        '@stylistic/js/quotes': [
+            'error',
+            'single'
+        ],
+        '@stylistic/js/semi': [
+            'error',
+            'never'
+        ],
+    }
+}copy
+扩展 eslint:recommended 将一套推荐的规则https://eslint.org/docs/latest/rules/添加到项目中。此外，还添加了关于缩进、换行、连字符和分号的规则。这四条规则都在Eslint样式插件中定义了。
+
+可以使用以下命令检查和验证像 index.js 这样的文件：
+
+npx eslint index.jscopy
+我们建议为linting创建一个单独的 npm script：
+
+{
+  // ...
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    // ...
+    "lint": "eslint ."
+  },
+  // ...
+}copy
+现在，npm run lint 命令将检查项目中的每个文件。
+
+当运行命令时，dist 目录中的文件也会被检查，我们不希望这种情况发生、我们可以通过在项目的根目录中创建一个.eslintignore 文件来实现这一点，文件的内容如下：
+
+distcopy
+这将导致整个dist目录不被ESlint检查。
+
+Lint对我们的代码有很多意见：
+
+ESlint错误的终端输出
+我们暂时不去修复这些问题。
+
+从命令行执行linter的更好替代方案是将eslint-plugin配置到编辑器中，这将连续运行linter。通过使用插件，你将立即在代码中看到错误。你可以在这里找到更多关于Visual Studio ESLint插件https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint的信息。
+
+VS Code的ESlint插件会用红线下划出风格违规：
+
+VScode ESLint插件显示错误的截图
+这使得错误很容易被发现并立即修复。
+
+ESlint有大量的规则https://eslint.org/docs/rules/，这些规则通过编辑 .eslintrc.js 文件就可以很容易地使用。
+
+让我们添加eqeqeq规则，如果用非三等号运算符检查等式，它会发出警告。该规则是在配置文件的rules字段下添加的。
+
+{
+  // ...
+  'rules': {
+    // ...
+   'eqeqeq': 'error',
+  },
+}copy
+在我们进行这项工作的同时，让我们对规则进行一些其他更改。
+
+让我们阻止行尾的不必要的尾随空格，要求大括号前后始终有一个空格，并且也要求箭头函数的函数参数中一致使用空格。
+
+{
+  // ...
+  'rules': {
+    // ...
+    'eqeqeq': 'error',
+    'no-trailing-spaces': 'error',
+    'object-curly-spacing': [
+        'error', 'always'
+    ],
+    'arrow-spacing': [
+        'error', { 'before': true, 'after': true }
+    ]
+  },
+}copy
+我们的默认配置从eslint:recommended中使用了一堆预定的规则：
+
+'extends': 'eslint:recommended',copy
+这包括一个关于 console.log 命令的警告规则。可以通过在配置文件中将其"值"定义为0来禁用一条规则。我们暂时为no-console规则这样做。
+
+{
+  // ...
+  'rules': {
+    // ...
+    'eqeqeq': 'error',
+    'no-trailing-spaces': 'error',
+    'object-curly-spacing': [
+        'error', 'always'
+    ],
+    'arrow-spacing': [
+        'error', { 'before': true, 'after': true }
+    ],
+    'no-console': 0
+  },
+}copy
+注意 当你对.eslintrc.js文件进行更改时，建议从命令行运行linter。这将验证配置文件是否正确格式化：
+
+如果你的配置文件中有什么错误，lint插件可能会表现得相当不稳定。
+
+许多公司定义编码标准，这些标准通过ESlint配置文件在整个组织中强制执行。不建议反复重新发明轮子，采用别人项目中的现成配置可能是个好主意。最近，许多项目通过采用Airbnb的ESlint配置https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb，采纳了Airbnb的Javascript风格指南https://github.com/airbnb/javascript。
