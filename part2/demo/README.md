@@ -51,6 +51,13 @@ npm install json-server --save-devcopy
 # Axios and promises
 注意：当文件index.js的内容发生变化时，React并不总是自动注意到这一点，所以你可能需要刷新浏览器来看到你的变化!一个简单的解决方法是在项目的根目录下创建一个名为.env的文件，并添加这一行FAST_REFRESH=false，使React自动注意到变化。重新启动应用以使应用的变化生效。
 
+# Frontend production build
+用create-react-app创建的应用的生产构建可以用npm run build命令创建。
+npm run build之后，应该可以工作。
+让我们从前端项目的根部运行这个命令。
+这将创建一个名为build的目录（其中包含我们应用的唯一HTML文件，index.html），该目录包含static。我们应用的Minified版本的JavaScript代码将被生成到static目录中。即使应用的代码在多个文件中，所有的JavaScript都将被最小化为一个文件。事实上，所有应用的依赖性代码也将被压缩到这个文件中。
+分解后的代码可读性不强。
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -121,3 +128,5 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+

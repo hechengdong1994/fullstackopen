@@ -40,6 +40,13 @@ let notes = [
 const express = require('express')
 const app = express()
 
+// 跨源资源共享（CORS）是一种机制，它允许网页上的限制性资源（如字体）从第一个资源所来自的域之外的另一个域被请求。
+// 一个网页可以自由嵌入跨源图像、样式表、脚本、iframe和视频。
+// 某些 "跨域 "请求，特别是Ajax请求，在默认情况下是被同源安全策略所禁止的。
+const cors = require('cors')
+// 允许来自所有源的请求。
+app.use(cors())
+
 const generateId = () => {
     const maxId = notes.length > 0
         // notes.map(n => n.id) 是一个 数组 ，所以它不能直接作为一个参数给 Math.max。
@@ -130,7 +137,8 @@ app.delete('/api/notes/:id', (request, response) => {
     response.status(204).end()
 })
 
-const PORT = 3001
+// 使用的是环境变量 PORT中定义的端口，如果环境变量PORT未定义，则使用3001端口。
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
