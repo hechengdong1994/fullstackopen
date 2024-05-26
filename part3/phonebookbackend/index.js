@@ -24,6 +24,24 @@ let persons = [
 ]
 
 const app = express()
+app.use(express.json())
+const morgan = require('morgan')
+// app.use(morgan('tiny'))
+// 定义token
+morgan.token('body', (req, res) => { return JSON.stringify(req.body) })
+// 在日志内容中调用token
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
+// app.use(morgan(function (tokens, req, res) {
+//     return [
+//         tokens.method(req, res),
+//         tokens.url(req, res),
+//         tokens.status(req, res),
+//         tokens.res(req, res, 'content-length'),
+//         '-',
+//         tokens['response-time'](req, res), 'ms',
+//         JSON.stringify(req.body)//tokens.body(req, res)
+//     ].join(' ')
+// }))
 
 app.get('', (request, response) => {
     response.end('Hello World')
@@ -35,7 +53,7 @@ app.get('/info', (request, response) => {
 })
 
 
-app.use(express.json())
+// app.use(express.json())
 app.post('/api/persons', (request, response) => {
     const person = request.body
 
