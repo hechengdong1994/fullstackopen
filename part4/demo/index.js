@@ -8,5 +8,5 @@ const server = http.createServer(app)
 
 server.listen(config.PORT, () => {
     //logger-module的函数info用于控制台打印输出
-    logger.info(`Server running on port ${config.POORT}`)
+    logger.info(`Server running on port ${config.PORT}`)
 })
