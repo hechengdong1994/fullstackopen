@@ -1,5 +1,6 @@
 const config = require('./utils/config')
 const express = require('express')
+require('express-async-errors') // 该库的"magic"使我们可以完全消除try-catch块。
 const app = express()
 const cors = require('cors')
 const notesRouter = require('./controllers/notes')
