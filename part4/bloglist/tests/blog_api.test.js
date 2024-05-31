@@ -77,6 +77,37 @@ test('blog without title or url can not be added', async () => {
         .expect({ 'error': 'Blog validation failed: title: Path `title` is required., url: Path `url` is required.' })
 })
 
+test('blog can be deleted', async () => {
+    const response = await api.get('/api/blogs')
+    const id = response.body[0].id
+
+    await api
+        .delete(`/api/blogs/${id}`)
+        .expect(204)
+})
+
+test('blog can be updated', async () => {
+    const newBlog = {
+        "title": "new title",
+        "author": "new author",
+        "url": "new url",
+        "likes": 6
+    }
+    const response = await api.get('/api/blogs')
+    const id = response.body[0].id
+
+    const updatedBlogResponse = await api
+        .put(`/api/blogs/${id}/likes`)
+        .send(newBlog)
+        .expect(200)
+    const updatedBlog = updatedBlogResponse.body
+
+    delete updatedBlog.id
+
+    assert.deepStrictEqual(updatedBlog, newBlog)
+})
+
+
 test('blogs are returned as json', async () => {
     const response = await api
         .get('/api/blogs')
