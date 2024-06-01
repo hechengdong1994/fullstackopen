@@ -3,6 +3,7 @@
 // 路由器实际上是一个中间件，它可以用来在一个地方定义 "相关的路由"，它通常被放在自己的模块中。
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
 
 // notesRouter.get('/', (request, response) => {
 //     Note.find({}).then(notes => {
@@ -10,7 +11,7 @@ const Note = require('../models/note')
 //     })
 // })
 notesRouter.get('/', async (request, response) => {
-    const notes = await Note.find({})
+    const notes = await Note.find({}).populate('user', { username: 1, name: 1 })
     response.json(notes)
 })
 
@@ -26,18 +27,24 @@ notesRouter.get('/:id', async (request, response) => {
 notesRouter.post('/', async (request, response, next) => {
     const body = request.body
 
+    const user = await User.findById(body.userId)
+
     const note = new Note({
         content: body.content,
-        important: body.important || false
+        important: body.important || false,
+        user: user.id
     })
 
     // 使用 async/await 时，处理异常的推荐方式是古老而熟悉的 try/catch 机制。
     try {
         const savedNote = await note.save()
+        user.notes = user.notes.concat(savedNote._id)
+        await user.save()
         response.status(201).json(savedNote)
     } catch (exception) {
         next(exception)
     }
+
 })
 
 // notesRouter.delete('/:id', async (request, response, next) => {
