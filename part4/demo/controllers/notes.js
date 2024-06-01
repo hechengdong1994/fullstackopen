@@ -5,6 +5,17 @@ const notesRouter = require('express').Router()
 const Note = require('../models/note')
 const User = require('../models/user')
 
+const jwt = require('jsonwebtoken')
+
+// 如果应用程序有多个接口需要身份验证，JWT的验证应该分离到自己的中间件中。也可以使用现有的库，如express-jwt
+const getTokenFrom = request => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+        return authorization.replace('Bearer ', '')
+    }
+    return null
+}
+
 // notesRouter.get('/', (request, response) => {
 //     Note.find({}).then(notes => {
 //         response.json(notes)
@@ -27,7 +38,12 @@ notesRouter.get('/:id', async (request, response) => {
 notesRouter.post('/', async (request, response, next) => {
     const body = request.body
 
-    const user = await User.findById(body.userId)
+    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+    if (!decodedToken.id) {
+        return response.status(401).json({ error: 'token invalid' })
+    }
+
+    const user = await User.findById(decodedToken.id)
 
     const note = new Note({
         content: body.content,
