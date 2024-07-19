@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken')
+
 const logger = require('./logger')
 
 const requestLogger = (request, response, next) => {
@@ -5,6 +7,16 @@ const requestLogger = (request, response, next) => {
     logger.info('Path:  ', request.path)
     logger.info('Body:  ', request.body)
     logger.info('---')
+    
+    next()
+}
+
+const userExtractor = (request, response, next) => {
+    const authorization = request.get('authorization')
+    if (authorization && authorization.startsWith('Bearer ')) {
+        request.user = jwt.verify(authorization.replace('Bearer ', ''), process.env.SECRET)
+    }
+
     next()
 }
 
@@ -24,4 +36,4 @@ const errorHandler = (error, request, response, next) => {
     next(error)
 }
 
-module.exports = { requestLogger, unknownEndpoint, errorHandler }
+module.exports = { requestLogger, userExtractor, unknownEndpoint, errorHandler }

@@ -1,20 +1,22 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     username: {
         type: String,
-        required: true,
-        unique: true // // this ensures the uniqueness of username
+        required: true
     },
-    name: String,
-    passwordHash: String,
-    notes: [
-        // 笔记的id以Mongo id数组的形式存储在用户文档中。
+    passwordHash: {
+        type: String,
+        required: true
+    },
+    blogs: [
         {
-            // 该字段的类型是ObjectId，引用note文档。
-            // Mongo 本身并不知道这是一个引用笔记的字段，这个语法纯粹是与 Mongoose 有关，并由 Mongoose 定义。
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Note'
+            ref: 'Blog'
         }
     ]
 })
