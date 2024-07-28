@@ -4,6 +4,7 @@ import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import Login from './components/Login'
 import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 const App = () => {
   const [user, setUser] = useState(null)
@@ -12,11 +13,7 @@ const App = () => {
 
   const [message, setMessage] = useState(null)
 
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
-  }, [])
+  useEffect(() => refreshBlogs(), [])
 
   useEffect(() => {
     const loginedJSON = window.localStorage.getItem('loginedBlogUser')
@@ -27,13 +24,25 @@ const App = () => {
     }
   }, [])
 
-  const onSubmitBlog = async (blog) => {
+  const refreshBlogs = async () => setBlogs(await blogService.getAll())
+
+  const createBlog = async (blog) => {
     const newBlog = await blogService.create(blog)
-    setBlogs(blogs.concat(newBlog))
+    await refreshBlogs()
     setMessage(`a new blog ${newBlog.title} by ${newBlog.author} added`)
     setTimeout(() => {
       setMessage(null)
     }, 3000)
+  }
+
+  const deleteBlog = async (id) => {
+    await blogService.deleteBlog(id)
+    await refreshBlogs()
+  }
+
+  const likeBlog = async (id) => {
+    await blogService.like(id)
+    await refreshBlogs()
   }
 
   const onLoginSubmit = async (username, password) => {
@@ -65,10 +74,12 @@ const App = () => {
         {user} logged in
         <button type='button' onClick={onLogoutSubmit}>logout</button>
       </div>
-      <BlogForm onSubmit={onSubmitBlog} />
+      <Togglable message='new note'>
+        <BlogForm createBlog={createBlog} />
+      </Togglable>
       <br />
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} likeBlog={likeBlog} deleteBlog={deleteBlog} />
       )}
     </div>
   )

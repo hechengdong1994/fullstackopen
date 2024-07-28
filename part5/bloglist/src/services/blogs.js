@@ -1,4 +1,4 @@
-const blogs = [
+let blogs = [
   {
     "id": 10000,
     "title": "Go To Statement Considered Harmful",
@@ -16,8 +16,19 @@ const getAll = async () => {
 }
 
 const create = async (blog) => {
-  blogs.push(blog)
-  return {...blog}
+  const result = { id: Date.now(), likes: 0, ...blog }
+  blogs.push(result)
+  return { ...result }
 }
 
-export default { getAll, create }
+const like = async (id) => {
+  blogs.map(blog => blog.id === id ? { likes: ++blog.likes, ...blog } : blog)
+}
+
+const deleteBlog = async (id) => {
+  blogs = blogs.filter(blog => blog.id !== id)
+}
+
+const blogService = { getAll, create, like, deleteBlog }
+
+export default blogService

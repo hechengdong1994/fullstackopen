@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-const BlogForm = ({ onSubmit }) => {
+const BlogForm = ({ createBlog }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -10,7 +10,10 @@ const BlogForm = ({ onSubmit }) => {
       <h2>create new</h2>
       <form onSubmit={(e) => {
         e.preventDefault()
-        onSubmit({title, author, url})
+        createBlog({title, author, url})
+        setTitle('')
+        setAuthor('')
+        setUrl('')
       }}>
         <div>
           title:<input type='text' value={title} onChange={(e) => setTitle(e.target.value)} />
