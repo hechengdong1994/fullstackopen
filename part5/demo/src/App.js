@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from 'react'
 import noteService from './services/notes'
 import loginService from './services/login'
-import Note from "./components/Note"
-import Notification from "./components/Notification"
-import LoginForm from "./components/LoginForm"
-import NoteForm from "./components/NoteForm"
-import Togglable from "./components/Togglable"
+import Note from './components/Note'
+import Notification from './components/Notification'
+import LoginForm from './components/LoginForm'
+import NoteForm from './components/NoteForm'
+import Togglable from './components/Togglable'
 
 const Footer = () => {
   const footerStyle = {
@@ -39,12 +39,24 @@ const App = () => {
       })
   }, [])
 
+  useEffect(() => {
+    debugger
+    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
+    }
+  }, [])
+
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
       const user = await loginService.login({
         username, password
       })
+
+      window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user))
       noteService.setToken(user.token)
       setUser(user)
       setUsername('')
