@@ -73,6 +73,7 @@ const noteSlice = createSlice({
 
 export const { toggleImportanceOf, appendNote, setNotes } = noteSlice.actions
 
+// npm install redux-thunk
 //通过Redux Thunk可以实现action creators，它返回一个函数而不是一个对象。该函数接收Redux store的dispatch和getState方法作为参数。
 //这允许异步动作创建者的实现，它首先等待某个异步操作的完成，然后分派一些动作，改变商店的状态。
 export const initializeNotes = () => {
