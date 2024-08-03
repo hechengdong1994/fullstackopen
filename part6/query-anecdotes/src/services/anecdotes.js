@@ -25,6 +25,7 @@ const getAll = async () => {
 }
 
 const create = async (content) => {
+  // throw new Error()
   const newAnecdote = asObject(content)
   anecdotes = [...anecdotes, newAnecdote]
   return newAnecdote

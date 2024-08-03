@@ -1,20 +1,26 @@
+import { useReducer } from 'react'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import AnecdoteForm from './components/AnecdoteForm'
 import Notification from './components/Notification'
 import anecdoteService from './services/anecdotes'
+import notificationReducer, { clearNotification, NotificationContext, setNotification } from './context/NotificationContext'
 
 const App = () => {
+  const [notification, notificationDispatch] = useReducer(notificationReducer, '')
+
+  const handleVote = (anecdote) => {
+    console.log('vote', anecdote.id)
+    voteMutation.mutate(anecdote.id)
+    notificationDispatch(setNotification(`anecdote '${anecdote.content}' voted`))
+    setTimeout(() => notificationDispatch(clearNotification()), 5000)
+  }
+
   const queryClient = useQueryClient()
   const voteMutation = useMutation(anecdoteService.vote, {
     onSuccess: () => {
       queryClient.invalidateQueries('anecdotes')
     }
   })
-
-  const handleVote = (anecdote) => {
-    console.log('vote', anecdote.id)
-    voteMutation.mutate(anecdote.id)
-  }
 
   const { data, isLoading, isError } = useQuery('anecdotes', () => anecdoteService.getAll(),
     // 请注意在某种故障情况下，查询会在 isLoading 状态中停留一会儿
@@ -41,7 +47,7 @@ const App = () => {
   const anecdotes = data
 
   return (
-    <div>
+    <NotificationContext.Provider value={[notification, notificationDispatch]}>
       <h3>Anecdote app</h3>
 
       <Notification />
@@ -58,7 +64,7 @@ const App = () => {
           </div>
         </div>
       )}
-    </div>
+    </NotificationContext.Provider>
   )
 }
 
